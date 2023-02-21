@@ -21,12 +21,16 @@ export default {
        })
     },
 
-   async loadDevs(context) {
+   async loadDevs(context, payload) {
+       if (!payload.forceRefresh && !context.getters.shouldUpdate) {
+           return
+       }
        const response = await fetch(`https://app-vue-3a8f3-default-rtdb.firebaseio.com/devs.json`);
        const responseData = await response.json()
 
        if (!response.ok) {
-                // errors
+                const error = new Error(responseData.message || 'Failed to fetch!!!')
+                throw error
        }
 
        const devs = [];
@@ -41,5 +45,6 @@ export default {
                areas: responseData[key].areas,
            }; devs.push(dev)
        } context.commit('setDevs', devs)
+       context.commit('setFetchTimeStamp')
    }
 }

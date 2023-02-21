@@ -6,6 +6,7 @@ export default {
    namespaced: true,
     state() {
       return {
+          lastFetch: null,
           devs: [
               {
                   id: 'd1',

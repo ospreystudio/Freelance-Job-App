@@ -1,11 +1,15 @@
 <template>
+  <div>
+  <base-dialog :show="!!error" title="An error has occurred" @close="handleError">
+    {{ error }}
+  </base-dialog>
 <section>
 <dev-filter @change-filter="setFilters"></dev-filter>
 </section>
   <section>
     <base-card>
     <div class="controls">
-      <base-button mode="outline" @click="loadDevs">Refresh</base-button>
+      <base-button mode="outline" @click="loadDevs(true)">Refresh</base-button>
       <base-button link to="/register" v-if="!isDev">Register as a Developer</base-button>
     </div>
       <div v-if="isLoading">
@@ -21,6 +25,7 @@
     <p v-else>No developers Found</p>
     </base-card>
   </section>
+  </div>
 </template>
 
 <script>
@@ -36,6 +41,7 @@ export default {
   data() {
     return {
       isLoading: false,
+      error: null,
     activeFilters: {
       frontend: true,
       backend: true,
@@ -74,10 +80,17 @@ export default {
     setFilters(updatedFilters) {
       this.activeFilters = updatedFilters
     },
-   async loadDevs() {
+   async loadDevs(refresh = false) {
       this.isLoading = true
-      await this.$store.dispatch('devModule/loadDevs')
+     try {
+       await this.$store.dispatch('devModule/loadDevs', {forceRefresh: refresh})
+     } catch (error) {
+        this.error = error.message || 'Some thing went wrong!!!'
+     }
      this.isLoading = false
+    },
+    handleError() {
+      this.error = null
     }
   },
 }
